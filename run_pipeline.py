@@ -8,47 +8,49 @@ import shutil
 import subprocess
 import sys
 import time
+
 from datetime import datetime, timezone
 from pathlib import Path
 
+import cv2
 import yaml
 
 
-ROOT = Path(__file__).resolve().parent
+# ============================================================
+# Project Root
+# ============================================================
 
+ROOT = (
+    Path(__file__)
+    .resolve()
+    .parent
+)
+
+
+# ============================================================
+# General Helpers
+# ============================================================
 
 def now_iso():
-    return datetime.now(timezone.utc).isoformat()
+    return (
+        datetime.now(
+            timezone.utc
+        )
+        .isoformat()
+    )
 
 
-def sha256_file(path):
-    h = hashlib.sha256()
+def resolve_path(path):
+    path = Path(path)
 
-    with open(path, "rb") as f:
-        for chunk in iter(
-            lambda: f.read(1024 * 1024),
-            b"",
-        ):
-            h.update(chunk)
+    if path.is_absolute():
+        return path
 
-    return h.hexdigest()
-
-
-def get_git_commit():
-    try:
-        return subprocess.check_output(
-            [
-                "git",
-                "rev-parse",
-                "HEAD",
-            ],
-            cwd=ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-
-    except Exception:
-        return None
+    return (
+        ROOT
+        /
+        path
+    ).resolve()
 
 
 def require_file(
@@ -57,20 +59,146 @@ def require_file(
 ):
     path = Path(path)
 
-    if not path.exists():
+    if not path.is_file():
         raise FileNotFoundError(
             f"{label} not found: {path}"
         )
 
-    if (
-        path.is_file()
-        and
-        path.stat().st_size == 0
-    ):
+    if path.stat().st_size == 0:
         raise RuntimeError(
             f"{label} is empty: {path}"
         )
 
+
+def require_script(path):
+    path = resolve_path(path)
+
+    require_file(
+        path,
+        "Required canonical stage",
+    )
+
+    return path
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+
+    with Path(path).open(
+        "rb"
+    ) as f:
+        for chunk in iter(
+            lambda: f.read(
+                1024 * 1024
+            ),
+            b"",
+        ):
+            h.update(
+                chunk
+            )
+
+    return (
+        h.hexdigest()
+    )
+
+
+def get_git_commit():
+    try:
+        return (
+            subprocess.check_output(
+                [
+                    "git",
+                    "rev-parse",
+                    "HEAD",
+                ],
+                cwd=ROOT,
+                text=True,
+                stderr=(
+                    subprocess.DEVNULL
+                ),
+            )
+            .strip()
+        )
+
+    except Exception:
+        return None
+
+
+def get_video_info(
+    video_path,
+):
+    cap = cv2.VideoCapture(
+        str(
+            video_path
+        )
+    )
+
+    if not cap.isOpened():
+        raise RuntimeError(
+            f"Cannot open video: "
+            f"{video_path}"
+        )
+
+    fps = cap.get(
+        cv2.CAP_PROP_FPS
+    )
+
+    frame_count = int(
+        cap.get(
+            cv2.CAP_PROP_FRAME_COUNT
+        )
+    )
+
+    width = int(
+        cap.get(
+            cv2.CAP_PROP_FRAME_WIDTH
+        )
+    )
+
+    height = int(
+        cap.get(
+            cv2.CAP_PROP_FRAME_HEIGHT
+        )
+    )
+
+    cap.release()
+
+    if fps is None or fps <= 0:
+        raise RuntimeError(
+            "Invalid video FPS."
+        )
+
+    return {
+        "fps":
+            float(
+                fps
+            ),
+
+        "frame_count":
+            frame_count,
+
+        "width":
+            width,
+
+        "height":
+            height,
+
+        "duration_sec":
+            (
+                frame_count
+                /
+                float(
+                    fps
+                )
+                if fps > 0
+                else None
+            ),
+    }
+
+
+# ============================================================
+# Logger
+# ============================================================
 
 class Logger:
 
@@ -78,28 +206,60 @@ class Logger:
         self,
         path,
     ):
-        self.path = Path(path)
+        self.path = Path(
+            path
+        )
 
         self.path.parent.mkdir(
             parents=True,
             exist_ok=True,
         )
 
+
     def write(
         self,
         message="",
     ):
-        message = str(message)
+        message = str(
+            message
+        )
 
-        print(message)
+        print(
+            message
+        )
 
         with self.path.open(
             "a",
             encoding="utf-8",
         ) as f:
             f.write(
-                message + "\n"
+                message
+                +
+                "\n"
             )
+
+
+# ============================================================
+# Stage Helpers
+# ============================================================
+
+def outputs_ready(
+    outputs,
+):
+    return all(
+        Path(
+            output
+        ).is_file()
+        and
+        Path(
+            output
+        ).stat().st_size
+        >
+        0
+
+        for output
+        in outputs
+    )
 
 
 def run_stage(
@@ -109,14 +269,10 @@ def run_stage(
     logger,
     dry_run=False,
 ):
-
-    start_iso = now_iso()
-
-    start_time = (
-        time.perf_counter()
+    logger.write(
+        ""
     )
 
-    logger.write("")
     logger.write(
         "=" * 70
     )
@@ -133,16 +289,24 @@ def run_stage(
         "COMMAND:"
     )
 
-    logger.write(
+    command_text = (
         " ".join(
             str(x)
-            for x in command
+            for x
+            in command
         )
+    )
+
+    logger.write(
+        command_text
+    )
+
+    started_at = (
+        now_iso()
     )
 
 
     if dry_run:
-
         return {
             "stage":
                 name,
@@ -151,13 +315,20 @@ def run_stage(
                 "dry_run",
 
             "started_at":
-                start_iso,
+                started_at,
 
             "finished_at":
                 now_iso(),
 
             "duration_sec":
                 0.0,
+
+            "command":
+                [
+                    str(x)
+                    for x
+                    in command
+                ],
 
             "outputs":
                 [
@@ -168,23 +339,28 @@ def run_stage(
         }
 
 
+    start = (
+        time.perf_counter()
+    )
+
     process = subprocess.Popen(
         [
             str(x)
             for x
             in command
         ],
-
         cwd=ROOT,
-
         stdout=subprocess.PIPE,
-
         stderr=subprocess.STDOUT,
-
         text=True,
-
         bufsize=1,
     )
+
+    if process.stdout is None:
+        raise RuntimeError(
+            f"Could not capture output "
+            f"for stage: {name}"
+        )
 
 
     with logger.path.open(
@@ -194,14 +370,13 @@ def run_stage(
 
         for line in process.stdout:
 
-            line = line.rstrip(
-                "\n"
+            print(
+                line,
+                end="",
             )
 
-            print(line)
-
             logfile.write(
-                line + "\n"
+                line
             )
 
 
@@ -209,16 +384,14 @@ def run_stage(
         process.wait()
     )
 
-
     duration = (
         time.perf_counter()
         -
-        start_time
+        start
     )
 
 
     if return_code != 0:
-
         raise RuntimeError(
             f"Stage failed: "
             f"{name} "
@@ -229,7 +402,6 @@ def run_stage(
     for output in (
         expected_outputs
     ):
-
         require_file(
             output,
             f"{name} output",
@@ -237,7 +409,8 @@ def run_stage(
 
 
     logger.write(
-        f"SUCCESS: {name} "
+        f"SUCCESS: "
+        f"{name} "
         f"({duration:.2f}s)"
     )
 
@@ -250,7 +423,7 @@ def run_stage(
             "success",
 
         "started_at":
-            start_iso,
+            started_at,
 
         "finished_at":
             now_iso(),
@@ -277,12 +450,16 @@ def run_stage(
     }
 
 
+# ============================================================
+# Main
+# ============================================================
+
 def main():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Football CV "
-            "pipeline runner"
+            "Football CV Analytics "
+            "Canonical Pipeline V4"
         )
     )
 
@@ -290,12 +467,18 @@ def main():
     parser.add_argument(
         "--video",
         required=True,
+        help=(
+            "Input football video."
+        ),
     )
 
 
     parser.add_argument(
         "--run-name",
         required=True,
+        help=(
+            "Name under runs/."
+        ),
     )
 
 
@@ -303,6 +486,16 @@ def main():
         "--config",
         default=(
             "configs/default.yaml"
+        ),
+    )
+
+
+    parser.add_argument(
+        "--device",
+        default=None,
+        help=(
+            "Override config device "
+            "(auto/mps/cpu/0/etc)."
         ),
     )
 
@@ -331,32 +524,28 @@ def main():
     )
 
 
-    args = parser.parse_args()
+    args = (
+        parser.parse_args()
+    )
 
 
-    # =====================================================
-    # PATHS
-    # =====================================================
+    # ========================================================
+    # Resolve Main Inputs
+    # ========================================================
 
-    video_path = (
-        ROOT
-        /
+    video_path = resolve_path(
         args.video
-    ).resolve()
+    )
 
-
-    config_path = (
-        ROOT
-        /
+    config_path = resolve_path(
         args.config
-    ).resolve()
+    )
 
 
     require_file(
         video_path,
         "Input video",
     )
-
 
     require_file(
         config_path,
@@ -370,11 +559,185 @@ def main():
     ) as f:
 
         config = (
-            yaml.safe_load(f)
+            yaml.safe_load(
+                f
+            )
         )
 
 
-    run_root = (
+    video_info = (
+        get_video_info(
+            video_path
+        )
+    )
+
+    fps = (
+        video_info[
+            "fps"
+        ]
+    )
+
+
+    # ========================================================
+    # Models
+    # ========================================================
+
+    models_cfg = (
+        config[
+            "models"
+        ]
+    )
+
+
+    player_model = resolve_path(
+        models_cfg[
+            "player_detector"
+        ]
+    )
+
+
+    pitch_model = resolve_path(
+        models_cfg[
+            "pitch_detector"
+        ]
+    )
+
+
+    old_ball_model = resolve_path(
+        models_cfg[
+            "old_ball_detector"
+        ]
+    )
+
+
+    forza_ball_model = resolve_path(
+        models_cfg[
+            "forza_ball_detector"
+        ]
+    )
+
+
+    require_file(
+        player_model,
+        "Player model",
+    )
+
+    require_file(
+        pitch_model,
+        "Pitch model",
+    )
+
+    require_file(
+        old_ball_model,
+        "Old ball model",
+    )
+
+    require_file(
+        forza_ball_model,
+        "Forza ball model",
+    )
+
+
+    # ========================================================
+    # Canonical Scripts
+    # ========================================================
+
+    radar_script = (
+        require_script(
+            "src/player/tracking.py"
+        )
+    )
+
+
+    trajectory_script = (
+        require_script(
+            "src/player/trajectory.py"
+        )
+    )
+
+
+    ball_script = (
+        require_script(
+            "src/ball/tracking.py"
+        )
+    )
+
+
+    possession_script = (
+        require_script(
+            "src/possession_pipeline.py"
+        )
+    )
+
+
+    event_engine_script = (
+        require_script(
+            "src/events/engine.py"
+        )
+    )
+
+
+    event_qa_script = (
+        require_script(
+            "src/events/qa.py"
+        )
+    )
+
+
+    # ========================================================
+    # Runtime
+    # ========================================================
+
+    if args.device is not None:
+
+        device = (
+            args.device
+        )
+
+    else:
+
+        device = (
+            config[
+                "runtime"
+            ].get(
+                "device",
+                "auto",
+            )
+        )
+
+
+    python_exec = (
+        sys.executable
+    )
+
+
+    # ========================================================
+    # Config Sections
+    # ========================================================
+
+    trajectory_cfg = (
+        config[
+            "pipeline"
+        ][
+            "trajectory"
+        ]
+    )
+
+
+    motion_cfg = (
+        config[
+            "pipeline"
+        ][
+            "motion_thresholds"
+        ]
+    )
+
+
+    # ========================================================
+    # Run Directory
+    # ========================================================
+
+    run_dir = (
         ROOT
         /
         "runs"
@@ -384,18 +747,18 @@ def main():
 
 
     if (
-        run_root.exists()
+        run_dir.exists()
         and
         args.overwrite
     ):
 
         shutil.rmtree(
-            run_root
+            run_dir
         )
 
 
     if (
-        run_root.exists()
+        run_dir.exists()
         and
         not args.resume
         and
@@ -404,34 +767,34 @@ def main():
 
         raise RuntimeError(
             f"Run already exists: "
-            f"{run_root}\n"
+            f"{run_dir}\n"
             f"Use --resume or --overwrite."
         )
 
 
     data_dir = (
-        run_root
+        run_dir
         /
         "data"
     )
 
 
     json_dir = (
-        run_root
+        run_dir
         /
         "json"
     )
 
 
     video_dir = (
-        run_root
+        run_dir
         /
         "videos"
     )
 
 
     log_dir = (
-        run_root
+        run_dir
         /
         "logs"
     )
@@ -457,139 +820,143 @@ def main():
     )
 
 
-    # =====================================================
-    # CONFIG SNAPSHOT
-    # =====================================================
+    # ========================================================
+    # Config Snapshot
+    # ========================================================
+
+    snapshot_path = (
+        run_dir
+        /
+        "config.snapshot.yaml"
+    )
+
 
     shutil.copy2(
         config_path,
-        run_root
+        snapshot_path,
+    )
+
+
+    # ========================================================
+    # Player Branch Outputs
+    # ========================================================
+
+    tracking_raw = (
+        data_dir
         /
-        "config.snapshot.yaml",
+        "tracking_data_v4.csv"
     )
 
 
-    # =====================================================
-    # CURRENT VALIDATED BASELINE INPUTS
-    #
-    # NOTE:
-    # Upstream scripts are still legacy/hard-coded.
-    # We will refactor them next.
-    # =====================================================
-
-    baseline = (
-        config[
-            "pipeline"
-        ][
-            "baseline"
-        ]
-    )
-
-
-    possession_v5_3 = (
-        ROOT
+    tracking_clean = (
+        data_dir
         /
-        baseline[
-            "possession_v5_3"
-        ]
-    ).resolve()
+        "tracking_data_clean_v2.csv"
+    )
 
 
-    controller_gate_v2 = (
-        ROOT
+    radar_video = (
+        video_dir
         /
-        baseline[
-            "controller_gate_v2"
-        ]
-    ).resolve()
+        "radar_v4.mp4"
+    )
 
 
-    air_touch_v4 = (
-        ROOT
+    # ========================================================
+    # Ball Branch Outputs
+    # ========================================================
+
+    ball_raw = (
+        data_dir
         /
-        baseline[
-            "air_touch_v4"
-        ]
-    ).resolve()
-
-
-    require_file(
-        possession_v5_3,
-        "Possession V5.3 baseline",
+        "ball_tracking_ensemble.csv"
     )
 
 
-    require_file(
-        controller_gate_v2,
-        "Controller Gate V2 baseline",
+    ball_trusted = (
+        data_dir
+        /
+        "ball_tracking_trusted.csv"
     )
 
 
-    require_file(
-        air_touch_v4,
-        "AirTouch V4 baseline",
+    ball_qa_video = (
+        video_dir
+        /
+        "ball_tracking_trusted_qa.mp4"
     )
 
 
-    thresholds = (
-        config[
-            "pipeline"
-        ][
-            "motion_thresholds"
-        ]
+    # ========================================================
+    # Canonical Possession Sub-run
+    # ========================================================
+
+    possession_run_dir = (
+        run_dir
+        /
+        "possession"
     )
 
 
-    python_exec = (
-        sys.executable
+    possession_data_dir = (
+        possession_run_dir
+        /
+        "data"
     )
 
 
-    # =====================================================
-    # OUTPUT FILES
-    # =====================================================
+    possession_frames = (
+        possession_data_dir
+        /
+        "possession_frames.csv"
+    )
+
+
+    possession_episodes = (
+        possession_data_dir
+        /
+        "possession_episodes.csv"
+    )
+
 
     motion_frames = (
-        data_dir
+        possession_data_dir
         /
         "ball_motion_state_v1_frames.csv"
     )
 
 
     motion_episodes = (
-        data_dir
+        possession_data_dir
         /
         "ball_motion_state_v1_episodes.csv"
     )
 
 
     motion_receptions = (
-        data_dir
+        possession_data_dir
         /
         "ball_motion_state_v1_receptions.csv"
     )
 
 
     motion_dribbles = (
-        data_dir
+        possession_data_dir
         /
         "ball_motion_state_v1_dribble_gaps.csv"
     )
 
 
-    possession_frames = (
-        data_dir
+    air_interaction_events = (
+        possession_data_dir
         /
-        "possession_v6_frames.csv"
+        "air_interaction_events.csv"
     )
 
 
-    possession_episodes = (
-        data_dir
-        /
-        "possession_v6_episodes.csv"
-    )
-
+    # ========================================================
+    # Event Outputs
+    # ========================================================
 
     events_csv = (
         data_dir
@@ -612,152 +979,490 @@ def main():
     )
 
 
-    qa_video = (
+    event_qa_video = (
         video_dir
         /
         "football_event_qa_v1.mp4"
     )
 
 
-    # =====================================================
-    # PIPELINE STAGES
-    # =====================================================
+    # ========================================================
+    # Build Stage Graph
+    # ========================================================
 
     stages = []
 
 
+    # ========================================================
+    # Stage 1
+    #
+    # Player tracking + pitch mapping
+    # ========================================================
+
     stages.append(
         {
             "name":
-                "ball_motion_state_v1",
+                "player_tracking",
 
             "command":
                 [
                     python_exec,
 
-                    "src/ball_motion_state_v1.py",
+                    radar_script,
 
-                    "--possession",
+                    "--video",
+
                     str(
-                        possession_v5_3
+                        video_path
                     ),
 
-                    "--gate",
+                    "--player-model",
+
                     str(
-                        controller_gate_v2
+                        player_model
                     ),
 
-                    "--events",
+                    "--pitch-model",
+
                     str(
-                        air_touch_v4
+                        pitch_model
                     ),
 
-                    "--output-dir",
+                    "--output-csv",
+
                     str(
-                        data_dir
+                        tracking_raw
                     ),
 
-                    "--launch-min-speed",
+                    "--output-video",
+
                     str(
-                        thresholds[
-                            "launch_min_speed_mps"
+                        radar_video
+                    ),
+
+                    "--device",
+
+                    str(
+                        device
+                    ),
+                ],
+
+            "outputs":
+                [
+                    tracking_raw,
+                    radar_video,
+                ],
+        }
+    )
+
+
+    # ========================================================
+    # Stage 2
+    #
+    # Integrated trajectory cleaning
+    # ========================================================
+
+    stages.append(
+        {
+            "name":
+                "trajectory_cleaning",
+
+            "command":
+                [
+                    python_exec,
+
+                    trajectory_script,
+
+                    "--input",
+
+                    str(
+                        tracking_raw
+                    ),
+
+                    "--output",
+
+                    str(
+                        tracking_clean
+                    ),
+
+                    "--fps",
+
+                    str(
+                        fps
+                    ),
+
+                    "--min-track-frames",
+
+                    str(
+                        trajectory_cfg[
+                            "min_track_frames"
                         ]
                     ),
 
-                    "--reception-confirm-sec",
+                    "--median-window",
+
                     str(
-                        thresholds[
-                            "reception_confirm_sec"
+                        trajectory_cfg[
+                            "median_window"
                         ]
                     ),
 
-                    "--dribble-return-sec",
+                    "--stage1-sg-window",
+
                     str(
-                        thresholds[
-                            "dribble_return_sec"
+                        trajectory_cfg[
+                            "stage1_sg_window"
+                        ]
+                    ),
+
+                    "--sg-polyorder",
+
+                    str(
+                        trajectory_cfg[
+                            "sg_polyorder"
+                        ]
+                    ),
+
+                    "--stage1-velocity-half-window",
+
+                    str(
+                        trajectory_cfg[
+                            "stage1_velocity_half_window"
+                        ]
+                    ),
+
+                    "--max-reasonable-speed",
+
+                    str(
+                        trajectory_cfg[
+                            "max_reasonable_speed"
+                        ]
+                    ),
+
+                    "--global-high-speed-threshold",
+
+                    str(
+                        trajectory_cfg[
+                            "global_high_speed_threshold"
+                        ]
+                    ),
+
+                    "--min-simultaneous-players",
+
+                    str(
+                        trajectory_cfg[
+                            "min_simultaneous_players"
+                        ]
+                    ),
+
+                    "--expand-bad-frame",
+
+                    str(
+                        trajectory_cfg[
+                            "expand_bad_frame"
+                        ]
+                    ),
+
+                    "--stage2-sg-window",
+
+                    str(
+                        trajectory_cfg[
+                            "stage2_sg_window"
+                        ]
+                    ),
+
+                    "--stage2-velocity-half-window",
+
+                    str(
+                        trajectory_cfg[
+                            "stage2_velocity_half_window"
                         ]
                     ),
                 ],
 
             "outputs":
                 [
-                    motion_frames,
-                    motion_episodes,
-                    motion_receptions,
-                    motion_dribbles,
+                    tracking_clean,
                 ],
         }
     )
 
 
+    # ========================================================
+    # Stage 3
+    #
+    # Ball tracking
+    #
+    # PASS A:
+    # cross-model ensemble tracking
+    #
+    # PASS B:
+    # trusted filtering + interpolation
+    # ========================================================
+
+    ball_command = [
+        python_exec,
+
+        ball_script,
+
+        "--video",
+
+        str(
+            video_path
+        ),
+
+        "--old-ball-model",
+
+        str(
+            old_ball_model
+        ),
+
+        "--forza-model",
+
+        str(
+            forza_ball_model
+        ),
+
+        "--pitch-model",
+
+        str(
+            pitch_model
+        ),
+
+        "--raw-output-csv",
+
+        str(
+            ball_raw
+        ),
+
+        "--output-csv",
+
+        str(
+            ball_trusted
+        ),
+
+        "--device",
+
+        str(
+            device
+        ),
+    ]
+
+
+    ball_outputs = [
+        ball_raw,
+        ball_trusted,
+    ]
+
+
+    if args.skip_qa:
+
+        ball_command.append(
+            "--skip-qa"
+        )
+
+    else:
+
+        ball_command.extend(
+            [
+                "--output-video",
+
+                str(
+                    ball_qa_video
+                ),
+            ]
+        )
+
+        ball_outputs.append(
+            ball_qa_video
+        )
+
+
     stages.append(
         {
             "name":
-                "possession_v6",
+                "ball_tracking",
 
             "command":
-                [
-                    python_exec,
+                ball_command,
 
-                    "src/possession_v6.py",
+            "outputs":
+                ball_outputs,
+        }
+    )
 
-                    "--motion",
-                    str(
-                        motion_frames
-                    ),
 
-                    "--output-dir",
-                    str(
-                        data_dir
-                    ),
-                ],
+    # ========================================================
+    # Stage 4
+    #
+    # Canonical Possession Pipeline
+    #
+    # Includes:
+    #   seed
+    #   air interaction
+    #   physical event integration
+    #   controller validation
+    #   refinement
+    #   ball motion
+    #   final possession
+    # ========================================================
+
+    possession_command = [
+        python_exec,
+
+        possession_script,
+
+        "--video",
+
+        str(
+            video_path
+        ),
+
+        "--player-model",
+
+        str(
+            player_model
+        ),
+
+        "--players",
+
+        str(
+            tracking_clean
+        ),
+
+        "--ball",
+
+        str(
+            ball_trusted
+        ),
+
+        "--run-dir",
+
+        str(
+            possession_run_dir
+        ),
+
+        "--device",
+
+        str(
+            device
+        ),
+
+        "--fps",
+
+        str(
+            fps
+        ),
+
+        "--launch-min-speed",
+
+        str(
+            motion_cfg[
+                "launch_min_speed_mps"
+            ]
+        ),
+
+        "--reception-confirm-sec",
+
+        str(
+            motion_cfg[
+                "reception_confirm_sec"
+            ]
+        ),
+
+        "--dribble-return-sec",
+
+        str(
+            motion_cfg[
+                "dribble_return_sec"
+            ]
+        ),
+
+        # The previous V3 runner did not create
+        # middle-stage QA products.
+        # Keep internal possession QA disabled here.
+        "--skip-qa",
+    ]
+
+
+    if args.resume:
+
+        possession_command.append(
+            "--resume"
+        )
+
+
+    stages.append(
+        {
+            "name":
+                "possession_pipeline",
+
+            "command":
+                possession_command,
 
             "outputs":
                 [
                     possession_frames,
                     possession_episodes,
+                    motion_frames,
+                    motion_episodes,
+                    motion_receptions,
+                    motion_dribbles,
+                    air_interaction_events,
                 ],
         }
     )
 
 
+    # ========================================================
+    # Stage 5
+    #
+    # Football Event Engine
+    # ========================================================
+
     stages.append(
         {
             "name":
-                "football_event_engine_v1",
+                "football_event_engine",
 
             "command":
                 [
                     python_exec,
 
-                    "src/football_event_engine_v1.py",
+                    event_engine_script,
 
                     "--frames",
+
                     str(
                         possession_frames
                     ),
 
                     "--possession-episodes",
+
                     str(
                         possession_episodes
                     ),
 
                     "--motion-episodes",
+
                     str(
                         motion_episodes
                     ),
 
                     "--air-events",
+
                     str(
-                        air_touch_v4
+                        air_interaction_events
                     ),
 
                     "--dribble-gaps",
+
                     str(
                         motion_dribbles
                     ),
 
                     "--output-dir",
+
                     str(
                         data_dir
                     ),
@@ -773,51 +1478,61 @@ def main():
     )
 
 
+    # ========================================================
+    # Stage 6
+    #
+    # Football Event QA
+    # ========================================================
+
     if not args.skip_qa:
 
         stages.append(
             {
                 "name":
-                    "football_event_qa_v1",
+                    "football_event_qa",
 
                 "command":
                     [
                         python_exec,
 
-                        "src/football_event_qa_v1.py",
+                        event_qa_script,
 
                         "--video",
+
                         str(
                             video_path
                         ),
 
                         "--frames",
+
                         str(
                             possession_frames
                         ),
 
                         "--events",
+
                         str(
                             events_csv
                         ),
 
                         "--output",
+
                         str(
-                            qa_video
+                            event_qa_video
                         ),
                     ],
 
                 "outputs":
                     [
-                        qa_video
+                        event_qa_video,
                     ],
             }
         )
 
 
-    # =====================================================
-    # MANIFEST
-    # =====================================================
+    # ========================================================
+    # Manifest
+    # ========================================================
 
     manifest = {
         "project":
@@ -828,13 +1543,16 @@ def main():
             ],
 
         "runner_version":
-            "1.0.0",
+            "4.0.0",
 
-        "scope":
-            "analysis_tail",
+        "pipeline_scope":
+            "canonical_v4",
 
         "run_name":
             args.run_name,
+
+        "status":
+            "running",
 
         "started_at":
             now_iso(),
@@ -842,6 +1560,14 @@ def main():
         "video":
             str(
                 video_path
+            ),
+
+        "video_info":
+            video_info,
+
+        "device":
+            str(
+                device
             ),
 
         "config":
@@ -863,21 +1589,69 @@ def main():
         "platform":
             platform.platform(),
 
-        "baseline_inputs":
+        "models":
             {
-                "possession_v5_3":
+                "player_detector":
                     str(
-                        possession_v5_3
+                        player_model
                     ),
 
-                "controller_gate_v2":
+                "pitch_detector":
                     str(
-                        controller_gate_v2
+                        pitch_model
                     ),
 
-                "air_touch_v4":
+                "old_ball_detector":
                     str(
-                        air_touch_v4
+                        old_ball_model
+                    ),
+
+                "forza_ball_detector":
+                    str(
+                        forza_ball_model
+                    ),
+            },
+
+        "canonical_outputs":
+            {
+                "player_tracking":
+                    str(
+                        tracking_raw
+                    ),
+
+                "player_tracking_clean":
+                    str(
+                        tracking_clean
+                    ),
+
+                "ball_tracking_raw":
+                    str(
+                        ball_raw
+                    ),
+
+                "ball_tracking_trusted":
+                    str(
+                        ball_trusted
+                    ),
+
+                "possession_run_dir":
+                    str(
+                        possession_run_dir
+                    ),
+
+                "possession_frames":
+                    str(
+                        possession_frames
+                    ),
+
+                "possession_episodes":
+                    str(
+                        possession_episodes
+                    ),
+
+                "football_events":
+                    str(
+                        events_csv
                     ),
             },
 
@@ -886,20 +1660,55 @@ def main():
     }
 
 
+    # ========================================================
+    # Start Logging
+    # ========================================================
+
     logger.write(
-        f"RUN: {args.run_name}"
+        f"RUN: "
+        f"{args.run_name}"
     )
 
 
     logger.write(
-        f"VIDEO: {video_path}"
+        f"VIDEO: "
+        f"{video_path}"
     )
 
 
     logger.write(
-        "PIPELINE SCOPE: analysis_tail"
+        f"VIDEO FPS: "
+        f"{fps:.3f}"
     )
 
+
+    logger.write(
+        "PIPELINE SCOPE: "
+        "canonical_v4"
+    )
+
+
+    logger.write(
+        "PLAYER BRANCH: "
+        "run-local"
+    )
+
+
+    logger.write(
+        "BALL BRANCH: "
+        "run-local"
+    )
+
+
+    logger.write(
+        "POSSESSION: "
+        "canonical run-local"
+    )
+
+
+    # ========================================================
+    # Execute Pipeline
+    # ========================================================
 
     total_start = (
         time.perf_counter()
@@ -917,20 +1726,21 @@ def main():
             )
 
 
+            # ------------------------------------------------
+            # Resume
+            # ------------------------------------------------
+
             if (
                 args.resume
-
                 and
-
-                all(
-                    output.exists()
-                    and
-                    output.stat().st_size > 0
-
-                    for output
-                    in outputs
+                outputs_ready(
+                    outputs
                 )
             ):
+
+                logger.write(
+                    ""
+                )
 
                 logger.write(
                     f"SKIP: "
@@ -999,14 +1809,15 @@ def main():
             )
 
 
-        # =================================================
-        # PRODUCT-FACING JSON
-        # =================================================
+        # ====================================================
+        # Product-facing JSON
+        # ====================================================
 
         if not args.dry_run:
 
             shutil.copy2(
                 events_json_source,
+
                 json_dir
                 /
                 "events.json",
@@ -1015,6 +1826,7 @@ def main():
 
             shutil.copy2(
                 summary_json_source,
+
                 json_dir
                 /
                 "summary.json",
@@ -1034,16 +1846,26 @@ def main():
 
         manifest[
             "status"
-        ] = "failed"
+        ] = (
+            "failed"
+        )
 
 
         manifest[
             "error"
-        ] = str(exc)
+        ] = str(
+            exc
+        )
 
 
         logger.write(
-            f"FAILED: {exc}"
+            ""
+        )
+
+
+        logger.write(
+            f"FAILED: "
+            f"{exc}"
         )
 
 
@@ -1061,7 +1883,9 @@ def main():
 
         manifest[
             "finished_at"
-        ] = now_iso()
+        ] = (
+            now_iso()
+        )
 
 
         manifest[
@@ -1072,11 +1896,14 @@ def main():
         )
 
 
-        with (
+        manifest_path = (
             json_dir
             /
             "manifest.json"
-        ).open(
+        )
+
+
+        with manifest_path.open(
             "w",
             encoding="utf-8",
         ) as f:
@@ -1092,6 +1919,9 @@ def main():
         runtime = {
             "run_name":
                 args.run_name,
+
+            "pipeline_scope":
+                "canonical_v4",
 
             "total_runtime_sec":
                 round(
@@ -1118,7 +1948,7 @@ def main():
 
 
         with (
-            run_root
+            run_dir
             /
             "runtime.json"
         ).open(
@@ -1133,23 +1963,129 @@ def main():
             )
 
 
-    logger.write("")
+    # ========================================================
+    # Complete
+    # ========================================================
+
+    logger.write(
+        ""
+    )
+
+
     logger.write(
         "=" * 70
     )
+
 
     logger.write(
         "PIPELINE COMPLETE"
     )
 
+
     logger.write(
         "=" * 70
     )
 
 
     logger.write(
-        f"Run directory: "
-        f"{run_root}"
+        f"Run: "
+        f"{run_dir}"
+    )
+
+
+    logger.write(
+        ""
+    )
+
+
+    logger.write(
+        "PLAYER BRANCH"
+    )
+
+
+    logger.write(
+        f"Raw tracking: "
+        f"{tracking_raw}"
+    )
+
+
+    logger.write(
+        f"Clean tracking: "
+        f"{tracking_clean}"
+    )
+
+
+    logger.write(
+        f"Radar video: "
+        f"{radar_video}"
+    )
+
+
+    logger.write(
+        ""
+    )
+
+
+    logger.write(
+        "BALL BRANCH"
+    )
+
+
+    logger.write(
+        f"Raw ball: "
+        f"{ball_raw}"
+    )
+
+
+    logger.write(
+        f"Trusted ball: "
+        f"{ball_trusted}"
+    )
+
+
+    if not args.skip_qa:
+
+        logger.write(
+            f"Ball QA: "
+            f"{ball_qa_video}"
+        )
+
+
+    logger.write(
+        ""
+    )
+
+
+    logger.write(
+        "POSSESSION"
+    )
+
+
+    logger.write(
+        f"Frames: "
+        f"{possession_frames}"
+    )
+
+
+    logger.write(
+        f"Episodes: "
+        f"{possession_episodes}"
+    )
+
+
+    logger.write(
+        f"Sub-run manifest: "
+        f"{possession_run_dir / 'manifest.json'}"
+    )
+
+
+    logger.write(
+        ""
+    )
+
+
+    logger.write(
+        "EVENT OUTPUT"
     )
 
 
@@ -1180,10 +2116,15 @@ def main():
     if not args.skip_qa:
 
         logger.write(
-            f"QA video: "
-            f"{qa_video}"
+            f"Event QA: "
+            f"{event_qa_video}"
         )
 
 
+# ============================================================
+# Entry
+# ============================================================
+
 if __name__ == "__main__":
+
     main()
