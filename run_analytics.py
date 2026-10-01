@@ -49,6 +49,13 @@ ANALYTICS_STAGES = [
         ROOT / "src" / "analytics" / "inter_team_spatial_metrics.py",
     ),
     (
+        "inter_team_spatial_metrics_identity_aware",
+        ROOT
+        / "src"
+        / "analytics"
+        / "inter_team_spatial_metrics_identity_aware.py",
+    ),
+    (
         "player_spatial_analysis",
         ROOT / "src" / "analytics" / "player_spatial_analysis.py",
     ),
