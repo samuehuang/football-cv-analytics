@@ -658,7 +658,7 @@ def main():
 
     ball_script = (
         require_script(
-            "src/ball_tracking_cli.py"
+            "src/ball/tracking.py"
         )
     )
 
