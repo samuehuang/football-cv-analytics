@@ -350,43 +350,43 @@ def main():
 
     possession_seed_script = (
         require_script(
-            "possession_seed_cli.py"
+            "possession/seed.py"
         )
     )
 
     air_interaction_script = (
         require_script(
-            "air_interaction_cli.py"
+            "possession/air_interaction.py"
         )
     )
 
     possession_v5_1_script = (
         require_script(
-            "possession_v5_1_cli.py"
+            "possession/physical_event.py"
         )
     )
 
     controller_gate_script = (
         require_script(
-            "controller_gate_cli.py"
+            "possession/controller_validation.py"
         )
     )
 
     refinement_script = (
         require_script(
-            "possession_refinement_cli.py"
+            "possession/refinement.py"
         )
     )
 
     ball_motion_script = (
         require_script(
-            "ball_motion_state_v1.py"
+            "possession/motion.py"
         )
     )
 
     possession_v6_script = (
         require_script(
-            "possession_v6.py"
+            "possession/final.py"
         )
     )
 
