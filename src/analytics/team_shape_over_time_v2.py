@@ -78,47 +78,10 @@ for team_name, team in df.groupby("team"):
 
 
     # --------------------------------------------------------
-    # Rolling median
-    # --------------------------------------------------------
-
-    team["length_smooth"] = (
-        team["team_length_m"]
-        .rolling(
-            ROLLING_WINDOW,
-            center=True,
-            min_periods=1
-        )
-        .median()
-    )
-
-
-    team["width_smooth"] = (
-        team["team_width_m"]
-        .rolling(
-            ROLLING_WINDOW,
-            center=True,
-            min_periods=1
-        )
-        .median()
-    )
-
-
-    team["compactness_smooth"] = (
-        team["compactness_m"]
-        .rolling(
-            ROLLING_WINDOW,
-            center=True,
-            min_periods=1
-        )
-        .median()
-    )
-
-
-    # --------------------------------------------------------
     # Detect gaps
     #
     # complete 10v10 dataset 中間可能有缺 frame。
-    # 不應該讓 matplotlib 直接跨缺口連線。
+    # smoothing 與 plotting 都不應該跨缺口。
     # --------------------------------------------------------
 
     team["time_gap"] = (
@@ -132,6 +95,67 @@ for team_name, team in df.groupby("team"):
             > MAX_TIME_GAP
         )
         .cumsum()
+    )
+
+
+    # --------------------------------------------------------
+    # Rolling median
+    #
+    # 每個 continuous segment 各自 smoothing，
+    # 避免 rolling window 跨越缺失區間。
+    # --------------------------------------------------------
+
+    team["length_smooth"] = (
+        team
+        .groupby(
+            "segment_id"
+        )["team_length_m"]
+        .transform(
+            lambda values:
+                values
+                .rolling(
+                    ROLLING_WINDOW,
+                    center=True,
+                    min_periods=1
+                )
+                .median()
+        )
+    )
+
+
+    team["width_smooth"] = (
+        team
+        .groupby(
+            "segment_id"
+        )["team_width_m"]
+        .transform(
+            lambda values:
+                values
+                .rolling(
+                    ROLLING_WINDOW,
+                    center=True,
+                    min_periods=1
+                )
+                .median()
+        )
+    )
+
+
+    team["compactness_smooth"] = (
+        team
+        .groupby(
+            "segment_id"
+        )["compactness_m"]
+        .transform(
+            lambda values:
+                values
+                .rolling(
+                    ROLLING_WINDOW,
+                    center=True,
+                    min_periods=1
+                )
+                .median()
+        )
     )
 
 
