@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Models / weights
+models/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Videos / media
+videos/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Runtime outputs
+outputs/
+runs/
+
+# Generated data
+*.log
+
+# Temporary / cache
+.cache/
+tmp/
+temp/
+
+# Jupyter
+.ipynb_checkpoints/

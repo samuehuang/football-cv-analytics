@@ -1,0 +1,89 @@
+project:
+  name: football-cv-analytics
+
+
+models:
+
+  player_detector:
+    models/football-player-detection.pt
+
+  pitch_detector:
+    models/football-pitch-detection.pt
+
+  old_ball_detector:
+    models/football-ball-detection.pt
+
+  forza_ball_detector:
+    models/yolov8m_forzasys_soccer.pt
+
+
+runtime:
+
+  device: auto
+
+
+pipeline:
+
+  baseline:
+
+    possession_v5_3:
+      outputs/possession_v5_3_frames.csv
+
+    controller_gate_v2:
+      outputs/controller_gate_v2.csv
+
+    air_touch_v4:
+      outputs/air_touch_v4_events.csv
+
+
+  trajectory:
+
+    min_track_frames: 50
+
+    median_window: 5
+
+    stage1_sg_window: 11
+
+    sg_polyorder: 2
+
+    stage1_velocity_half_window: 2
+
+    max_reasonable_speed: 12.0
+
+    global_high_speed_threshold: 12.0
+
+    min_simultaneous_players: 3
+
+    expand_bad_frame: 2
+
+    stage2_sg_window: 9
+
+    stage2_velocity_half_window: 4
+
+
+  motion_thresholds:
+
+    launch_min_speed_mps: 6.0
+
+    reception_confirm_sec: 0.12
+
+    dribble_return_sec: 0.32
+
+
+  versions:
+
+    radar: v4
+
+    trajectory_cleaning: integrated_v1
+
+    ball_tracking: integrated_ensemble_trusted_v1
+
+    controller_gate: v2
+
+    air_touch: v4
+
+    ball_motion_state: v1
+
+    possession: v6
+
+    football_event_engine: v1
