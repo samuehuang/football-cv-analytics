@@ -9,6 +9,38 @@ import numpy as np
 import pandas as pd
 
 
+EVENT_COLUMNS = [
+    "track_id",
+    "from_team",
+    "to_team",
+    "before_start_frame",
+    "before_end_frame",
+    "after_start_frame",
+    "after_end_frame",
+    "before_duration_sec",
+    "after_duration_sec",
+    "transition_time_sec",
+    "transition_gap_sec",
+    "transition_distance_m",
+    "transition_speed_mps",
+]
+
+
+PAIR_COLUMNS = [
+    "track_id_a",
+    "track_id_b",
+    "transition_a",
+    "transition_b",
+    "transition_time_a_sec",
+    "transition_time_b_sec",
+    "transition_time_delta_sec",
+    "closest_frame",
+    "closest_time_sec",
+    "minimum_distance_m",
+    "confidence",
+]
+
+
 REQUIRED_COLUMNS = {
     "frame",
     "time_sec",
@@ -270,7 +302,10 @@ def detect_switch_events(
                 }
             )
 
-    return pd.DataFrame(events)
+    return pd.DataFrame(
+        events,
+        columns=EVENT_COLUMNS,
+    )
 
 
 def closest_pair_distance(
@@ -377,7 +412,9 @@ def pair_switch_events(
     args,
 ):
     if events.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(
+            columns=PAIR_COLUMNS,
+        )
 
     pairs = []
 
@@ -500,7 +537,10 @@ def pair_switch_events(
                 }
             )
 
-    return pd.DataFrame(pairs)
+    return pd.DataFrame(
+        pairs,
+        columns=PAIR_COLUMNS,
+    )
 
 
 def main():
