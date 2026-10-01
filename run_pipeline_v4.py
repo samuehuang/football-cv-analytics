@@ -672,14 +672,14 @@ def main():
 
     event_engine_script = (
         require_script(
-            "src/football_event_engine_v1.py"
+            "src/events/engine.py"
         )
     )
 
 
     event_qa_script = (
         require_script(
-            "src/football_event_qa_v1.py"
+            "src/events/qa.py"
         )
     )
 
