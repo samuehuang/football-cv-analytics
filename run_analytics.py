@@ -27,6 +27,13 @@ ANALYTICS_STAGES = [
         ROOT / "src" / "analytics" / "build_tactical_clean_dataset.py",
     ),
     (
+        "build_tactical_identity_aware_dataset",
+        ROOT
+        / "src"
+        / "analytics"
+        / "build_tactical_identity_aware_dataset.py",
+    ),
+    (
         "team_tactical_metrics",
         ROOT / "src" / "analytics" / "team_tactical_metrics_v2.py",
     ),
@@ -94,7 +101,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_stage(name: str, command: list[str]) -> None:
+def print_stage(
+    name: str,
+    command: list[str],
+) -> None:
     print()
     print("=" * 70)
     print(f"STAGE: {name}")
@@ -106,9 +116,11 @@ def print_stage(name: str, command: list[str]) -> None:
 def main() -> None:
     args = parse_args()
 
-    run_dir = Path(
-        args.run_dir
-    ).expanduser().resolve()
+    run_dir = (
+        Path(args.run_dir)
+        .expanduser()
+        .resolve()
+    )
 
     if args.tracking:
         tracking_csv = (
