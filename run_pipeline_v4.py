@@ -644,14 +644,14 @@ def main():
 
     radar_script = (
         require_script(
-            "src/radar_v4_cli.py"
+            "src/player/tracking.py"
         )
     )
 
 
     trajectory_script = (
         require_script(
-            "src/trajectory_cleaning_cli.py"
+            "src/player/trajectory.py"
         )
     )
 
