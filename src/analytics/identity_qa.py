@@ -29,14 +29,20 @@ def parse_args():
 
     parser.add_argument(
         "--input",
-        required=True,
-        help="Clean player tracking CSV.",
+        default="outputs/tracking_data_clean_v2.csv",
+        help=(
+            "Clean player tracking CSV. "
+            "Default: outputs/tracking_data_clean_v2.csv"
+        ),
     )
 
     parser.add_argument(
         "--output-dir",
-        required=True,
-        help="Directory for QA CSV outputs.",
+        default="outputs",
+        help=(
+            "Directory for QA CSV outputs. "
+            "Default: outputs"
+        ),
     )
 
     parser.add_argument(
@@ -132,10 +138,18 @@ def build_team_segments(track: pd.DataFrame):
                 "duration_sec": float(
                     last["time_sec"] - first["time_sec"]
                 ),
-                "start_x": float(first["pitch_x_final_m"]),
-                "start_y": float(first["pitch_y_final_m"]),
-                "end_x": float(last["pitch_x_final_m"]),
-                "end_y": float(last["pitch_y_final_m"]),
+                "start_x": float(
+                    first["pitch_x_final_m"]
+                ),
+                "start_y": float(
+                    first["pitch_y_final_m"]
+                ),
+                "end_x": float(
+                    last["pitch_x_final_m"]
+                ),
+                "end_y": float(
+                    last["pitch_y_final_m"]
+                ),
                 "rows": int(len(seg)),
             }
         )
@@ -143,7 +157,10 @@ def build_team_segments(track: pd.DataFrame):
     return segments
 
 
-def detect_switch_events(df, args):
+def detect_switch_events(
+    df: pd.DataFrame,
+    args,
+):
     events = []
 
     for track_id, track in df.groupby("track_id"):
@@ -257,12 +274,12 @@ def detect_switch_events(df, args):
 
 
 def closest_pair_distance(
-    df,
-    track_a,
-    track_b,
-    transition_time_a,
-    transition_time_b,
-    window_sec,
+    df: pd.DataFrame,
+    track_a: int,
+    track_b: int,
+    transition_time_a: float,
+    transition_time_b: float,
+    window_sec: float,
 ):
     center_start = (
         min(
@@ -283,10 +300,13 @@ def closest_pair_distance(
     a = df[
         (df["track_id"] == track_a)
         &
-        (df["time_sec"].between(
-            center_start,
-            center_end,
-        ))
+        (
+            df["time_sec"]
+            .between(
+                center_start,
+                center_end,
+            )
+        )
     ][
         [
             "frame",
@@ -299,10 +319,13 @@ def closest_pair_distance(
     b = df[
         (df["track_id"] == track_b)
         &
-        (df["time_sec"].between(
-            center_start,
-            center_end,
-        ))
+        (
+            df["time_sec"]
+            .between(
+                center_start,
+                center_end,
+            )
+        )
     ][
         [
             "frame",
@@ -322,10 +345,14 @@ def closest_pair_distance(
         return None
 
     merged["distance_m"] = np.hypot(
-        merged["pitch_x_final_m_a"]
-        - merged["pitch_x_final_m_b"],
-        merged["pitch_y_final_m_a"]
-        - merged["pitch_y_final_m_b"],
+        (
+            merged["pitch_x_final_m_a"]
+            - merged["pitch_x_final_m_b"]
+        ),
+        (
+            merged["pitch_y_final_m_a"]
+            - merged["pitch_y_final_m_b"]
+        ),
     )
 
     row = merged.loc[
@@ -344,7 +371,11 @@ def closest_pair_distance(
     }
 
 
-def pair_switch_events(df, events, args):
+def pair_switch_events(
+    df: pd.DataFrame,
+    events: pd.DataFrame,
+    args,
+):
     if events.empty:
         return pd.DataFrame()
 
@@ -386,15 +417,21 @@ def pair_switch_events(df, events, args):
 
             proximity = closest_pair_distance(
                 df=df,
-                track_a=int(a["track_id"]),
-                track_b=int(b["track_id"]),
+                track_a=int(
+                    a["track_id"]
+                ),
+                track_b=int(
+                    b["track_id"]
+                ),
                 transition_time_a=float(
                     a["transition_time_sec"]
                 ),
                 transition_time_b=float(
                     b["transition_time_sec"]
                 ),
-                window_sec=args.proximity_window_sec,
+                window_sec=(
+                    args.proximity_window_sec
+                ),
             )
 
             if proximity is None:
@@ -428,25 +465,35 @@ def pair_switch_events(df, events, args):
 
                     "transition_time_a_sec":
                         float(
-                            a["transition_time_sec"]
+                            a[
+                                "transition_time_sec"
+                            ]
                         ),
 
                     "transition_time_b_sec":
                         float(
-                            b["transition_time_sec"]
+                            b[
+                                "transition_time_sec"
+                            ]
                         ),
 
                     "transition_time_delta_sec":
                         float(time_delta),
 
                     "closest_frame":
-                        proximity["closest_frame"],
+                        proximity[
+                            "closest_frame"
+                        ],
 
                     "closest_time_sec":
-                        proximity["closest_time_sec"],
+                        proximity[
+                            "closest_time_sec"
+                        ],
 
                     "minimum_distance_m":
-                        proximity["minimum_distance_m"],
+                        proximity[
+                            "minimum_distance_m"
+                        ],
 
                     "confidence":
                         "HIGH",
@@ -471,12 +518,20 @@ def main():
         .resolve()
     )
 
+    if not input_path.exists():
+        raise FileNotFoundError(
+            f"Tracking input not found: "
+            f"{input_path}"
+        )
+
     output_dir.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    df = pd.read_csv(input_path)
+    df = pd.read_csv(
+        input_path
+    )
 
     missing = (
         REQUIRED_COLUMNS
@@ -486,7 +541,9 @@ def main():
     if missing:
         raise ValueError(
             "Missing required columns: "
-            + ", ".join(sorted(missing))
+            + ", ".join(
+                sorted(missing)
+            )
         )
 
     df = df[
@@ -494,9 +551,13 @@ def main():
     ].copy()
 
     df = df[
-        np.isfinite(df["pitch_x_final_m"])
+        np.isfinite(
+            df["pitch_x_final_m"]
+        )
         &
-        np.isfinite(df["pitch_y_final_m"])
+        np.isfinite(
+            df["pitch_y_final_m"]
+        )
     ].copy()
 
     events = detect_switch_events(
@@ -536,6 +597,11 @@ def main():
     print("=" * 70)
 
     print(
+        "Input:",
+        input_path,
+    )
+
+    print(
         "Persistent team transitions:",
         len(events),
     )
@@ -548,6 +614,7 @@ def main():
     if not events.empty:
         print()
         print("TRANSITIONS")
+
         print(
             events.to_string(
                 index=False
@@ -557,6 +624,7 @@ def main():
     if not pairs.empty:
         print()
         print("HIGH-CONFIDENCE PAIRS")
+
         print(
             pairs.to_string(
                 index=False
@@ -564,8 +632,15 @@ def main():
         )
 
     print()
-    print("Events:", events_path)
-    print("Pairs: ", pairs_path)
+    print(
+        "Events:",
+        events_path,
+    )
+
+    print(
+        "Pairs: ",
+        pairs_path,
+    )
 
 
 if __name__ == "__main__":
