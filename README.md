@@ -345,6 +345,33 @@ Rolling smoothing is calculated independently inside continuous observation segm
 
 ---
 
+## Installation
+
+The validated development environment uses Python 3.9.6.
+
+Create and activate a virtual environment:
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+
+Upgrade pip:
+
+    python -m pip install --upgrade pip
+
+Install the validated Python dependencies:
+
+    python -m pip install -r requirements.txt
+
+Verify the environment:
+
+    python -m pip check
+
+The validated dependency set includes NumPy, Pandas, SciPy, Matplotlib, OpenCV, scikit-learn, PyTorch, Ultralytics, Supervision, Sports, and PyYAML.
+
+> Model weights are not included in the repository. Place the required model files under `models/` before running the main pipeline.
+
+---
+
 ## Quick Start
 
 ### 1. Prepare Model Files
