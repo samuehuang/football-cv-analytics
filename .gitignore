@@ -45,3 +45,5 @@ temp/
 
 # Jupyter
 .ipynb_checkpoints/
+# Local audit artifacts
+*_dependency_audit.txt
