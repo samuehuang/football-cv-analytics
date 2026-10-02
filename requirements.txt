@@ -1,0 +1,17 @@
+# Football CV Analytics
+# Validated environment: Python 3.9.6
+
+numpy==2.0.2
+pandas==2.3.3
+scipy==1.13.1
+matplotlib==3.9.4
+
+opencv-python==5.0.0.93
+scikit-learn==1.6.1
+
+torch==2.8.0
+ultralytics==8.4.116
+supervision==0.29.1
+sports==0.1.0
+
+PyYAML==6.0.3
