@@ -895,6 +895,14 @@ Final GitHub presentation
 
 ---
 
+## License
+
+This project is released under the [MIT License](LICENSE).
+
+Model weights, input videos, datasets, and third-party dependencies are not distributed as part of this repository and remain subject to their respective licenses and terms.
+
+---
+
 ## Project Status
 
 The core computer-vision and tactical analytics pipeline is complete and regression-tested.
