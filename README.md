@@ -532,6 +532,31 @@ python run_analytics.py \
 
 ---
 
+## Sample Outputs
+
+Small representative outputs are included under:
+
+`examples/sample_outputs/`
+
+These files allow the data structures produced by the pipeline to be inspected without running the full video pipeline.
+
+| Output | Description |
+| --- | --- |
+| [tracking_sample.csv](examples/sample_outputs/tracking_sample.csv) | Small sample of cleaned player tracking with image coordinates, pitch coordinates, trajectory cleaning, and speed fields. |
+| [football_events.csv](examples/sample_outputs/football_events.csv) | Complete event-engine output containing possession episodes, dribbles, receptions, passes, and other detected football events. |
+| [tactical_coverage_comparison.csv](examples/sample_outputs/tactical_coverage_comparison.csv) | Comparison between strict and identity-aware complete 10v10 tactical coverage. |
+| [team_tactical_metrics_summary_identity_aware.csv](examples/sample_outputs/team_tactical_metrics_summary_identity_aware.csv) | Team-level centroid, length, width, compactness, and shape-area statistics. |
+
+For the validated sample:
+
+- Strict tactical coverage: **323 / 747 frames (43.2%)**
+- Identity-aware tactical coverage: **405 / 747 frames (54.2%)**
+- Additional complete tactical frames recovered: **82**
+
+The identity-aware outputs apply only high-confidence team-assignment corrections for team-level tactical analysis; they do not represent recovered physical player identities.
+
+---
+
 ## Output Structure
 
 Canonical runs are stored under:
