@@ -68,8 +68,22 @@ ANALYTICS_STAGES = [
         ROOT / "src" / "analytics" / "team_shape_over_time_v2.py",
     ),
     (
+        "team_shape_over_time_identity_aware",
+        ROOT
+        / "src"
+        / "analytics"
+        / "team_shape_over_time_identity_aware.py",
+    ),
+    (
         "team_shape_snapshot",
         ROOT / "src" / "analytics" / "team_shape_snapshot.py",
+    ),
+    (
+        "team_shape_snapshot_identity_aware",
+        ROOT
+        / "src"
+        / "analytics"
+        / "team_shape_snapshot_identity_aware.py",
     ),
 ]
 
