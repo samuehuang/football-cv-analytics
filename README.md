@@ -407,6 +407,29 @@ The validated dependency set includes NumPy, Pandas, SciPy, Matplotlib, OpenCV, 
 
 ---
 
+## Quick Verification
+
+After installing the dependencies, the repository can be checked without model weights or input video:
+
+    python scripts/smoke_test.py
+
+The smoke test verifies:
+
+- Required repository files
+- Direct Python dependencies
+- Python source compilation
+- Main pipeline CLI
+- Analytics CLI
+- Representative sample-output schemas
+
+A successful check ends with:
+
+    SMOKE TEST: PASS
+
+This is a lightweight repository check and does not run model inference or the full video pipeline.
+
+---
+
 ## Quick Start
 
 ### 1. Prepare Model Files
