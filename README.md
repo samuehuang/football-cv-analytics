@@ -41,6 +41,25 @@ The full pipeline connects computer vision and football analytics:
 
 ---
 
+## Demo
+
+<p align="center">
+  <img src="docs/assets/football_cv_demo.gif" width="900" alt="Football CV Analytics demo">
+</p>
+
+<p align="center">
+  <em>
+    Single-view visualization of player/team tracking, pitch radar projection,
+    trusted ball tracking, possession reasoning, and football event detection.
+  </em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/samuehuang/football-cv-analytics/releases/download/v4.1.0/football_cv_analytics_demo_full_30s.mp4">
+    <strong>Watch the full 30-second demo (MP4)</strong>
+  </a>
+</p>
+
 ## Overview
 
 The pipeline converts a football match video into structured tracking, event, and tactical data.
