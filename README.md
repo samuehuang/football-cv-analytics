@@ -6,6 +6,41 @@ The project is designed as a modular pipeline rather than a single inference scr
 
 ---
 
+## Results at a Glance
+
+### End-to-End Football Tracking
+
+<p align="center">
+  <img src="docs/assets/radar_tracking_frame.jpg" width="900" alt="Football player tracking and pitch radar visualization">
+</p>
+
+<p align="center">
+  <em>Video-based player tracking with pitch projection and radar visualization.</em>
+</p>
+
+### Tactical Analytics
+
+| Identity-Aware Team Shape | Average Positions |
+| --- | --- |
+| <img src="docs/assets/team_shape_snapshot_identity_aware.png" width="430" alt="Identity-aware team shape snapshot"> | <img src="docs/assets/average_positions.png" width="430" alt="Average player positions"> |
+| Representative 10v10 team structure after high-confidence team-assignment correction. | Spatial summary of player positioning on the pitch. |
+
+<p align="center">
+  <img src="docs/assets/team_compactness_over_time_identity_aware.png" width="900" alt="Team compactness over time">
+</p>
+
+<p align="center">
+  <em>Identity-aware team compactness over time for temporal tactical analysis.</em>
+</p>
+
+The full pipeline connects computer vision and football analytics:
+
+**video → player tracking → trajectory cleaning → ball tracking → possession reasoning → event extraction → tactical analysis**
+
+> Identity-aware analytics only corrects high-confidence team-assignment inconsistencies for team-level analysis. It does not claim recovery of physical player identity.
+
+---
+
 ## Overview
 
 Given a football match video, the pipeline produces:
