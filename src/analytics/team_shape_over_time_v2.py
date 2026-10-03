@@ -185,7 +185,11 @@ def plot_metric(
     )
 
 
+    team_colors = {"A": "tab:blue", "B": "tab:red"}
+
     for team_name in ["A", "B"]:
+
+        team_color = team_colors[team_name]
 
         team = df[
             df["team"] == team_name
@@ -203,6 +207,7 @@ def plot_metric(
             ax.plot(
                 segment["time_sec"],
                 segment[raw_column],
+                color=team_color,
                 alpha=0.15,
                 linewidth=1
             )
@@ -212,6 +217,7 @@ def plot_metric(
             ax.plot(
                 segment["time_sec"],
                 segment[smooth_column],
+                color=team_color,
                 linewidth=2.5,
                 label=(
                     f"Team {team_name}"
