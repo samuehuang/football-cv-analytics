@@ -105,6 +105,14 @@ class CoachReportTests(unittest.TestCase):
         self.assertEqual(
             len(report["team_shape"]["descriptive_medians"]), 6
         )
+        self.assertEqual(report["event_sequences"]["status"], "not_requested")
+        self.assertEqual(report["opponent_spacing"]["status"], "not_requested")
+        markdown = (self.run_dir / "reports/coach_report_v1.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("2 detected phases", markdown)
+        self.assertIn("Longest Team A phase: frames 0–11", markdown)
+        self.assertNotIn("- Episode 1:", markdown)
 
     def test_missing_b_state_suppresses_comparison(self):
         self.write_tactical(range(12))

@@ -41,9 +41,11 @@ physical player identity.
 
 By default, reports are written to `<run-dir>/reports/`. Use `--output-dir` to keep strict and identity-aware outputs in separate directories.
 
-The CLI writes `reports/coach_report_v1.json` and `.md` within the chosen run.
-The JSON retains full frame ranges; Markdown summarizes them. Neither output
-claims that a measured association was caused by an event.
+The CLI writes `coach_report_v1.json` and `.md` to the selected output directory.
+The JSON retains every possession phase and full frame ranges. Markdown shows
+the phase count and longest A/B phases to keep the summary readable. Neither
+output claims that a measured association was caused by an event. Without
+`--include-event-windows`, event sections have status `not_requested`.
 
 Reject duplicate possession frames, duplicate tactical `(frame, team)` rows,
 invalid episode boundaries, non-finite reported metrics, incomplete A/B tactical
@@ -68,13 +70,16 @@ For each pair, take five consecutive frames immediately before `Pass.start_frame
 and five immediately after `Reception.end_frame`. Both windows and the detected
 sequence must fit inside one possession episode for the event team. All ten
 spacing frames must exist and have finite metric values. Missing frames, a
-phase boundary, ambiguous pairing, or mismatched tracks suppress the
-observation with a machine-readable reason.
+phase boundary, ambiguous pairing (including multiple Pass detections for one
+Reception), or mismatched tracks suppress the observation with a
+machine-readable reason.
 
 `median_nearest_opponent_m` is calculated across players from both teams at
 each frame. The report then compares the median of that frame metric in the
 two five-frame windows. It does not measure receiver pressure. A difference
 across a detected pass sequence is an association, not an effect of the pass.
+The Markdown shows the Pass frame interval alongside both measured windows;
+the gap between those windows may span many frames.
 
 For the validated `pipeline_v4_fresh` sample, event pairs 27/28 and 29/30
 have complete windows. Pair 33/34 lacks spacing frames; Reception 25 has

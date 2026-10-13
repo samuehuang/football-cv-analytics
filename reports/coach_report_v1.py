@@ -262,15 +262,15 @@ def build_report(run_dir, branch, min_frames, include_events=False):
             }
             if windows is not None
             else {
-                "status": "not_implemented",
-                "reason": "event_windows_pending",
+                "status": "not_requested",
+                "reason": "include_event_windows_disabled",
             }
         ),
         "event_sequences": (
             windows if windows is not None
             else {
-                "status": "not_implemented",
-                "reason": "event_windows_pending",
+                "status": "not_requested",
+                "reason": "include_event_windows_disabled",
             }
         ),
     }
@@ -314,13 +314,18 @@ def render_markdown(report):
         if state not in ("A", "B"):
             lines.append(f"- {state}: {count} frames")
 
-    lines += ["", "## Possession phases", ""]
-    for phase in possession["episodes"]:
-        lines.append(
-            f"- Episode {phase['episode_id']}: frames "
-            f"{phase['start_frame']}–{phase['end_frame']}, "
-            f"{phase['possession']}"
-        )
+    phases = possession["episodes"]
+    lines += ["", "## Possession phases", "",
+              f"{len(phases)} detected phases; all episode ranges are in coach_report_v1.json."]
+    for team in ("A", "B"):
+        team_phases = [phase for phase in phases if phase["possession"] == team]
+        if team_phases:
+            longest = max(team_phases, key=lambda phase: phase["duration_frames"])
+            lines.append(
+                f"- Longest Team {team} phase: frames "
+                f"{longest['start_frame']}–{longest['end_frame']} "
+                f"({longest['duration_frames']} frames)."
+            )
 
     lines += ["", "## Team shape", ""]
     available = report["team_shape"]["valid_frames_by_possession"]
@@ -373,19 +378,20 @@ def render_markdown(report):
 
     lines += ["", "## Detected pass-to-reception sequences", ""]
     windows = report["event_sequences"]
-    if windows.get("status") == "not_implemented":
+    if windows.get("status") == "not_requested":
         lines.append("Not included in this report.")
     else:
         for item in windows["supported"]:
             lines.append(
                 f"- Pipeline detections {item['pass_event_id']} (Pass) "
                 f"and {item['reception_event_id']} (Reception), "
-                f"Team {item['team']}: "
-                f"{item['before_median']:.3f} m before the pass "
-                f"(frames {item['before_frames']}) and "
-                f"{item['after_median']:.3f} m after reception "
-                f"(frames {item['after_frames']}); "
-                f"observed difference "
+                f"Team {item['team']}, Pass frames {item['pass_frames']}, "
+                f"Reception frame {item['reception_frame']}: "
+                f"both-team nearest-opponent metric "
+                f"{item['before_median']:.3f} m in the pre-pass window "
+                f"(frames {item['before_frames']}) versus "
+                f"{item['after_median']:.3f} m in the post-reception window "
+                f"(frames {item['after_frames']}); window difference "
                 f"{item['difference_after_minus_before']:+.3f} m."
             )
         for item in windows["unavailable"]:

@@ -98,6 +98,19 @@ def analyze_event_windows(run_dir, branch, phases, tactical_frames, window=5):
         reception = matches.iloc[0]
         reception_id = int(reception["event_id"])
 
+        competing_passes = passes.loc[
+            (passes["end_frame"] == int(reception["start_frame"]) - 1)
+            & (passes["team"] == passing.team)
+        ]
+        if len(competing_passes) > 1:
+            used_receptions.add(reception_id)
+            unavailable.append({
+                "pass_event_id": int(passing.event_id),
+                "reception_event_id": reception_id,
+                "reason": "ambiguous_reception",
+            })
+            continue
+
         # Track IDs are used only to check consistency between detections.
         # They are not treated as verified physical player identities.
         if (
@@ -123,10 +136,6 @@ def analyze_event_windows(run_dir, branch, phases, tactical_frames, window=5):
                 })
                 continue
 
-        if reception_id in used_receptions:
-            raise ValueError(
-                f"Reception {reception_id} paired more than once"
-            )
         used_receptions.add(reception_id)
 
         before_frames = list(

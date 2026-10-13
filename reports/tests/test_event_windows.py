@@ -111,6 +111,26 @@ class EventWindowTests(unittest.TestCase):
         )
         self.assertEqual(pair["reason"], "target_track_mismatch")
 
+    def test_two_passes_for_one_reception_are_omitted(self):
+        self.event_rows.append(
+            (6, "Pass", 11, 14, "A", "A", 5, 4)
+        )
+        self.write_events()
+        result = self.analyze()
+        self.assertFalse(result["supported"])
+        ambiguous = [
+            item for item in result["unavailable"]
+            if item["reason"] == "ambiguous_reception"
+        ]
+        self.assertEqual(
+            {item["pass_event_id"] for item in ambiguous}, {2, 6}
+        )
+        self.assertFalse(any(
+            item.get("reception_event_id") == 3
+            and item["reason"] == "no_paired_pass"
+            for item in result["unavailable"]
+        ))
+
 
 if __name__ == "__main__":
     unittest.main()

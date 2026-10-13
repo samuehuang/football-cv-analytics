@@ -86,7 +86,13 @@ Inspect representative outputs without running inference:
 
 ## Experimental Coach Report
 
-The draft [Coach Report V1](reports/specs/coach_report_v1.md) creates clip-level JSON and Markdown reports from completed pipeline and tactical outputs. Pass --branch identity_aware and optionally --include-event-windows. Coverage gaps and unsupported comparisons are shown explicitly.
+The draft [Coach Report V1](reports/specs/coach_report_v1.md) summarizes one analyzed clip from completed pipeline and tactical outputs:
+
+```bash
+python reports/coach_report_v1.py --run-dir runs/my_match --branch identity_aware --include-event-windows
+```
+
+It writes JSON evidence and a short Markdown summary. Event windows require the event and spatial CSVs; they are descriptive measurements, not coaching recommendations.
 
 ## Limitations
 
