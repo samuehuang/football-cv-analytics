@@ -84,6 +84,10 @@ Inspect representative outputs without running inference:
 - [Pipeline reference](docs/pipeline_reference.md): component details, event counts, CLI options, output structure, configuration, and regression checks.
 - [Development roadmap](docs/roadmap.md): planned report questions, evidence requirements, and release criteria.
 
+## Experimental Coach Report
+
+The draft [Coach Report V1](reports/specs/coach_report_v1.md) creates clip-level JSON and Markdown reports from completed pipeline and tactical outputs. Pass --branch identity_aware and optionally --include-event-windows. Coverage gaps and unsupported comparisons are shown explicitly.
+
 ## Limitations
 
 - Tracking IDs are not verified physical player identities; identity-aware corrections apply only to high-confidence team assignments.

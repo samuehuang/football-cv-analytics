@@ -39,6 +39,8 @@ physical player identity.
 
 ## Output and validation
 
+By default, reports are written to `<run-dir>/reports/`. Use `--output-dir` to keep strict and identity-aware outputs in separate directories.
+
 The CLI writes `reports/coach_report_v1.json` and `.md` within the chosen run.
 The JSON retains full frame ranges; Markdown summarizes them. Neither output
 claims that a measured association was caused by an event.

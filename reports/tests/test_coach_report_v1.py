@@ -133,5 +133,30 @@ class CoachReportTests(unittest.TestCase):
         self.assertIn("disagrees at frame 12", result.stderr)
 
 
+
+    def test_custom_output_dir_keeps_default_report(self):
+        first = self.run_report()
+        self.assertEqual(first.returncode, 0, first.stderr)
+
+        default_path = self.run_dir / "reports/coach_report_v1.json"
+        original = default_path.read_bytes()
+        separate_dir = self.run_dir / "alternative_reports"
+
+        second = subprocess.run(
+            [
+                sys.executable, str(SCRIPT),
+                "--run-dir", str(self.run_dir),
+                "--branch", "identity_aware",
+                "--output-dir", str(separate_dir),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertTrue(
+            (separate_dir / "coach_report_v1.json").is_file()
+        )
+        self.assertEqual(default_path.read_bytes(), original)
+
 if __name__ == "__main__":
     unittest.main()

@@ -412,6 +412,7 @@ def main():
     parser.add_argument("--run-dir", required=True, type=Path)
     parser.add_argument("--branch", required=True, choices=TACTICAL_FILES)
     parser.add_argument("--min-state-frames", type=int, default=10)
+    parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--include-event-windows", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
@@ -424,7 +425,10 @@ def main():
         run_dir, args.branch, args.min_state_frames,
         args.include_event_windows,
     )
-    output_dir = run_dir / "reports"
+    output_dir = (
+        args.output_dir.resolve()
+        if args.output_dir else run_dir / "reports"
+    )
     json_path = output_dir / "coach_report_v1.json"
     markdown_path = output_dir / "coach_report_v1.md"
 
