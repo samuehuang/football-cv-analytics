@@ -1,8 +1,9 @@
 # Coach Report V1 specification
 
-Status: draft implementation. The current generator reports possession, phases,
-coverage, and descriptive team shape for one analyzed clip. Event-linked
-observations are not implemented yet.
+Status: draft implementation. The generator reports possession, phases,
+coverage, and descriptive team shape for one analyzed clip. Optional
+pass-to-reception spacing observations are available with
+`--include-event-windows`.
 
 ## Inputs
 
@@ -51,9 +52,34 @@ For the validated `pipeline_v4_fresh` sample, identity-aware tactical coverage
 is 405/747. Of those complete frames, 219 have Team A possession and zero have
 Team B possession. An in/out shape comparison is therefore unavailable.
 
+## Optional pass-to-reception windows
+
+`--include-event-windows` reads `data/football_events_v1.csv` and the selected
+branch's `inter_team_spatial_metrics_frame*.csv`. Without the option, the
+original report works without those inputs.
+
+A Pass pairs with exactly one same-team Reception beginning on the next frame.
+If the event files supply target and receiving track IDs, they must agree.
+Those IDs check pipeline consistency; they are not verified physical identities.
+
+For each pair, take five consecutive frames immediately before `Pass.start_frame`
+and five immediately after `Reception.end_frame`. Both windows and the detected
+sequence must fit inside one possession episode for the event team. All ten
+spacing frames must exist and have finite metric values. Missing frames, a
+phase boundary, ambiguous pairing, or mismatched tracks suppress the
+observation with a machine-readable reason.
+
+`median_nearest_opponent_m` is calculated across players from both teams at
+each frame. The report then compares the median of that frame metric in the
+two five-frame windows. It does not measure receiver pressure. A difference
+across a detected pass sequence is an association, not an effect of the pass.
+
+For the validated `pipeline_v4_fresh` sample, event pairs 27/28 and 29/30
+have complete windows. Pair 33/34 lacks spacing frames; Reception 25 has
+no paired Pass. The output must preserve these omissions.
+
 ## Next implementation slice
 
-Join detected Pass and Reception event IDs to complete, consecutive pre/post
-frame windows and available inter-team spatial metrics. Suppress observations
-when the window crosses a frame gap or possession boundary. Keep causal and
-coaching recommendations out of the deterministic report.
+Validate event-window behavior on another run and inspect detected events
+against video before using these observations in a coaching context. Keep
+causal explanations and recommendations outside the deterministic report.

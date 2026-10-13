@@ -9,6 +9,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from event_windows import analyze_event_windows
+
 
 METRICS = ("team_width_m", "team_length_m", "compactness_m")
 TACTICAL_FILES = {
@@ -46,7 +48,7 @@ def frame_ranges(frames):
     return result
 
 
-def build_report(run_dir, branch, min_frames):
+def build_report(run_dir, branch, min_frames, include_events=False):
     possession_path = run_dir / "possession/data/possession_v6_frames.csv"
     episodes_path = run_dir / "possession/data/possession_v6_episodes.csv"
     tactical_path = run_dir / "analytics/outputs" / TACTICAL_FILES[branch]
@@ -203,6 +205,12 @@ def build_report(run_dir, branch, min_frames):
                 },
             })
 
+    windows = (
+        analyze_event_windows(
+            run_dir, branch, phase_rows, set(team_counts.index)
+        )
+        if include_events else None
+    )
     frames = sorted(states_by_frame)
     missing_frames = set(range(frames[0], frames[-1] + 1)) - set(frames)
     return {
@@ -242,14 +250,29 @@ def build_report(run_dir, branch, min_frames):
             "descriptive_medians": descriptive_medians,
             "comparisons": comparisons,
         },
-        "opponent_spacing": {
-            "status": "not_implemented",
-            "reason": "event_windows_pending",
-        },
-        "event_sequences": {
-            "status": "not_implemented",
-            "reason": "event_windows_pending",
-        },
+        "opponent_spacing": (
+            {
+                "status": (
+                    "supported" if windows["supported"]
+                    else "insufficient_data"
+                ),
+                "metric": windows["metric"],
+                "unit": windows["unit"],
+                "source_files": windows["source_files"],
+            }
+            if windows is not None
+            else {
+                "status": "not_implemented",
+                "reason": "event_windows_pending",
+            }
+        ),
+        "event_sequences": (
+            windows if windows is not None
+            else {
+                "status": "not_implemented",
+                "reason": "event_windows_pending",
+            }
+        ),
     }
 
 
@@ -348,13 +371,39 @@ def render_markdown(report):
             f"out {item['frame_ranges']['out']}."
         )
 
-    lines += [
-        "",
-        "## Opponent spacing and event sequences",
-        "",
-        "Not implemented in this draft. No event-linked claim is made.",
-        "",
-    ]
+    lines += ["", "## Detected pass-to-reception sequences", ""]
+    windows = report["event_sequences"]
+    if windows.get("status") == "not_implemented":
+        lines.append("Not included in this report.")
+    else:
+        for item in windows["supported"]:
+            lines.append(
+                f"- Pipeline detections {item['pass_event_id']} (Pass) "
+                f"and {item['reception_event_id']} (Reception), "
+                f"Team {item['team']}: "
+                f"{item['before_median']:.3f} m before the pass "
+                f"(frames {item['before_frames']}) and "
+                f"{item['after_median']:.3f} m after reception "
+                f"(frames {item['after_frames']}); "
+                f"observed difference "
+                f"{item['difference_after_minus_before']:+.3f} m."
+            )
+        for item in windows["unavailable"]:
+            event_id = item.get(
+                "pass_event_id", item.get("reception_event_id")
+            )
+            lines.append(
+                f"- Detection {event_id}: unavailable "
+                f"({item['reason']})."
+            )
+        lines += [
+            "",
+            "Metric: the median nearest-opponent distance across "
+            "both teams at each frame, summarized across five frames "
+            "on each side. These are observed associations, not "
+            "receiver pressure or causal effects.",
+        ]
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -363,6 +412,7 @@ def main():
     parser.add_argument("--run-dir", required=True, type=Path)
     parser.add_argument("--branch", required=True, choices=TACTICAL_FILES)
     parser.add_argument("--min-state-frames", type=int, default=10)
+    parser.add_argument("--include-event-windows", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
 
@@ -370,7 +420,10 @@ def main():
         parser.error("--min-state-frames must be at least 1")
 
     run_dir = args.run_dir.resolve()
-    report = build_report(run_dir, args.branch, args.min_state_frames)
+    report = build_report(
+        run_dir, args.branch, args.min_state_frames,
+        args.include_event_windows,
+    )
     output_dir = run_dir / "reports"
     json_path = output_dir / "coach_report_v1.json"
     markdown_path = output_dir / "coach_report_v1.md"
