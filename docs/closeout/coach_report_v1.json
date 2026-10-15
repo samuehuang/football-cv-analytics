@@ -1,0 +1,1002 @@
+{
+  "schema_version": "1.0-draft",
+  "run_id": "pipeline_v4_fresh",
+  "clip_scope": {
+    "first_frame": 3,
+    "last_frame": 749,
+    "missing_frame_ranges": []
+  },
+  "provenance": {
+    "tactical_branch": "identity_aware",
+    "inputs": {
+      "possession_frames": "runs/pipeline_v4_fresh/possession/data/possession_v6_frames.csv",
+      "possession_episodes": "runs/pipeline_v4_fresh/possession/data/possession_v6_episodes.csv",
+      "tactical_frames": "runs/pipeline_v4_fresh/analytics/outputs/team_tactical_metrics_frame_identity_aware.csv",
+      "tactical_coverage": "runs/pipeline_v4_fresh/analytics/outputs/tactical_coverage_comparison.csv"
+    }
+  },
+  "coverage": {
+    "possession_frames": 747,
+    "tactical_valid_frames": 405,
+    "tactical_denominator_tracking_frames": 747
+  },
+  "possession": {
+    "state_frames": {
+      "A": 274,
+      "B": 133,
+      "Contested": 2,
+      "Unknown": 338
+    },
+    "known_team_frames": 407,
+    "team_shares_of_known": {
+      "A": 0.6732186732186732,
+      "B": 0.32678132678132676
+    },
+    "episodes": [
+      {
+        "episode_id": 1,
+        "start_frame": 3,
+        "end_frame": 9,
+        "duration_frames": 7,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 2,
+        "start_frame": 10,
+        "end_frame": 27,
+        "duration_frames": 18,
+        "possession": "B"
+      },
+      {
+        "episode_id": 3,
+        "start_frame": 28,
+        "end_frame": 31,
+        "duration_frames": 4,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 4,
+        "start_frame": 32,
+        "end_frame": 98,
+        "duration_frames": 67,
+        "possession": "B"
+      },
+      {
+        "episode_id": 5,
+        "start_frame": 99,
+        "end_frame": 106,
+        "duration_frames": 8,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 6,
+        "start_frame": 107,
+        "end_frame": 107,
+        "duration_frames": 1,
+        "possession": "B"
+      },
+      {
+        "episode_id": 7,
+        "start_frame": 108,
+        "end_frame": 108,
+        "duration_frames": 1,
+        "possession": "Contested"
+      },
+      {
+        "episode_id": 8,
+        "start_frame": 109,
+        "end_frame": 109,
+        "duration_frames": 1,
+        "possession": "B"
+      },
+      {
+        "episode_id": 9,
+        "start_frame": 110,
+        "end_frame": 111,
+        "duration_frames": 2,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 10,
+        "start_frame": 112,
+        "end_frame": 120,
+        "duration_frames": 9,
+        "possession": "B"
+      },
+      {
+        "episode_id": 11,
+        "start_frame": 121,
+        "end_frame": 121,
+        "duration_frames": 1,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 12,
+        "start_frame": 122,
+        "end_frame": 132,
+        "duration_frames": 11,
+        "possession": "B"
+      },
+      {
+        "episode_id": 13,
+        "start_frame": 133,
+        "end_frame": 142,
+        "duration_frames": 10,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 14,
+        "start_frame": 143,
+        "end_frame": 151,
+        "duration_frames": 9,
+        "possession": "B"
+      },
+      {
+        "episode_id": 15,
+        "start_frame": 152,
+        "end_frame": 152,
+        "duration_frames": 1,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 16,
+        "start_frame": 153,
+        "end_frame": 153,
+        "duration_frames": 1,
+        "possession": "B"
+      },
+      {
+        "episode_id": 17,
+        "start_frame": 154,
+        "end_frame": 155,
+        "duration_frames": 2,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 18,
+        "start_frame": 156,
+        "end_frame": 171,
+        "duration_frames": 16,
+        "possession": "B"
+      },
+      {
+        "episode_id": 19,
+        "start_frame": 172,
+        "end_frame": 172,
+        "duration_frames": 1,
+        "possession": "Contested"
+      },
+      {
+        "episode_id": 20,
+        "start_frame": 173,
+        "end_frame": 400,
+        "duration_frames": 228,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 21,
+        "start_frame": 401,
+        "end_frame": 611,
+        "duration_frames": 211,
+        "possession": "A"
+      },
+      {
+        "episode_id": 22,
+        "start_frame": 612,
+        "end_frame": 622,
+        "duration_frames": 11,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 23,
+        "start_frame": 623,
+        "end_frame": 628,
+        "duration_frames": 6,
+        "possession": "A"
+      },
+      {
+        "episode_id": 24,
+        "start_frame": 629,
+        "end_frame": 633,
+        "duration_frames": 5,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 25,
+        "start_frame": 634,
+        "end_frame": 681,
+        "duration_frames": 48,
+        "possession": "A"
+      },
+      {
+        "episode_id": 26,
+        "start_frame": 682,
+        "end_frame": 682,
+        "duration_frames": 1,
+        "possession": "Unknown"
+      },
+      {
+        "episode_id": 27,
+        "start_frame": 683,
+        "end_frame": 691,
+        "duration_frames": 9,
+        "possession": "A"
+      },
+      {
+        "episode_id": 28,
+        "start_frame": 692,
+        "end_frame": 749,
+        "duration_frames": 58,
+        "possession": "Unknown"
+      }
+    ]
+  },
+  "team_shape": {
+    "min_state_frames": 10,
+    "valid_frames_by_possession": {
+      "A": 219,
+      "B": 0,
+      "Contested": 0,
+      "Unknown": 186
+    },
+    "descriptive_medians": [
+      {
+        "context": "all_complete_frames",
+        "team": "A",
+        "status": "supported",
+        "valid_frames": 405,
+        "frame_ranges": [
+          [
+            183,
+            195
+          ],
+          [
+            197,
+            281
+          ],
+          [
+            286,
+            344
+          ],
+          [
+            355,
+            364
+          ],
+          [
+            369,
+            369
+          ],
+          [
+            374,
+            374
+          ],
+          [
+            376,
+            378
+          ],
+          [
+            399,
+            549
+          ],
+          [
+            568,
+            583
+          ],
+          [
+            603,
+            603
+          ],
+          [
+            605,
+            605
+          ],
+          [
+            608,
+            612
+          ],
+          [
+            615,
+            616
+          ],
+          [
+            618,
+            625
+          ],
+          [
+            630,
+            649
+          ],
+          [
+            651,
+            677
+          ],
+          [
+            679,
+            679
+          ],
+          [
+            681,
+            681
+          ]
+        ],
+        "median_m": {
+          "team_width_m": 38.413,
+          "team_length_m": 32.367,
+          "compactness_m": 20.93
+        }
+      },
+      {
+        "context": "all_complete_frames",
+        "team": "B",
+        "status": "supported",
+        "valid_frames": 405,
+        "frame_ranges": [
+          [
+            183,
+            195
+          ],
+          [
+            197,
+            281
+          ],
+          [
+            286,
+            344
+          ],
+          [
+            355,
+            364
+          ],
+          [
+            369,
+            369
+          ],
+          [
+            374,
+            374
+          ],
+          [
+            376,
+            378
+          ],
+          [
+            399,
+            549
+          ],
+          [
+            568,
+            583
+          ],
+          [
+            603,
+            603
+          ],
+          [
+            605,
+            605
+          ],
+          [
+            608,
+            612
+          ],
+          [
+            615,
+            616
+          ],
+          [
+            618,
+            625
+          ],
+          [
+            630,
+            649
+          ],
+          [
+            651,
+            677
+          ],
+          [
+            679,
+            679
+          ],
+          [
+            681,
+            681
+          ]
+        ],
+        "median_m": {
+          "team_width_m": 31.614,
+          "team_length_m": 22.227,
+          "compactness_m": 14.649
+        }
+      },
+      {
+        "context": "A_possession",
+        "team": "A",
+        "status": "supported",
+        "valid_frames": 219,
+        "frame_ranges": [
+          [
+            401,
+            549
+          ],
+          [
+            568,
+            583
+          ],
+          [
+            603,
+            603
+          ],
+          [
+            605,
+            605
+          ],
+          [
+            608,
+            611
+          ],
+          [
+            623,
+            625
+          ],
+          [
+            634,
+            649
+          ],
+          [
+            651,
+            677
+          ],
+          [
+            679,
+            679
+          ],
+          [
+            681,
+            681
+          ]
+        ],
+        "median_m": {
+          "team_width_m": 39.078,
+          "team_length_m": 35.849,
+          "compactness_m": 22.118
+        }
+      },
+      {
+        "context": "A_possession",
+        "team": "B",
+        "status": "supported",
+        "valid_frames": 219,
+        "frame_ranges": [
+          [
+            401,
+            549
+          ],
+          [
+            568,
+            583
+          ],
+          [
+            603,
+            603
+          ],
+          [
+            605,
+            605
+          ],
+          [
+            608,
+            611
+          ],
+          [
+            623,
+            625
+          ],
+          [
+            634,
+            649
+          ],
+          [
+            651,
+            677
+          ],
+          [
+            679,
+            679
+          ],
+          [
+            681,
+            681
+          ]
+        ],
+        "median_m": {
+          "team_width_m": 32.02,
+          "team_length_m": 20.932,
+          "compactness_m": 14.642
+        }
+      }
+    ],
+    "comparisons": [
+      {
+        "team": "A",
+        "metric": "team_width_m",
+        "unit": "m",
+        "status": "insufficient_data",
+        "reason": "too_few_frames",
+        "in_possession_median": null,
+        "out_of_possession_median": null,
+        "difference_in_minus_out": null,
+        "valid_frames": {
+          "in": 219,
+          "out": 0
+        },
+        "eligible_frames": {
+          "in": 274,
+          "out": 133
+        },
+        "frame_ranges": {
+          "in": [
+            [
+              401,
+              549
+            ],
+            [
+              568,
+              583
+            ],
+            [
+              603,
+              603
+            ],
+            [
+              605,
+              605
+            ],
+            [
+              608,
+              611
+            ],
+            [
+              623,
+              625
+            ],
+            [
+              634,
+              649
+            ],
+            [
+              651,
+              677
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              681,
+              681
+            ]
+          ],
+          "out": []
+        }
+      },
+      {
+        "team": "A",
+        "metric": "team_length_m",
+        "unit": "m",
+        "status": "insufficient_data",
+        "reason": "too_few_frames",
+        "in_possession_median": null,
+        "out_of_possession_median": null,
+        "difference_in_minus_out": null,
+        "valid_frames": {
+          "in": 219,
+          "out": 0
+        },
+        "eligible_frames": {
+          "in": 274,
+          "out": 133
+        },
+        "frame_ranges": {
+          "in": [
+            [
+              401,
+              549
+            ],
+            [
+              568,
+              583
+            ],
+            [
+              603,
+              603
+            ],
+            [
+              605,
+              605
+            ],
+            [
+              608,
+              611
+            ],
+            [
+              623,
+              625
+            ],
+            [
+              634,
+              649
+            ],
+            [
+              651,
+              677
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              681,
+              681
+            ]
+          ],
+          "out": []
+        }
+      },
+      {
+        "team": "A",
+        "metric": "compactness_m",
+        "unit": "m",
+        "status": "insufficient_data",
+        "reason": "too_few_frames",
+        "in_possession_median": null,
+        "out_of_possession_median": null,
+        "difference_in_minus_out": null,
+        "valid_frames": {
+          "in": 219,
+          "out": 0
+        },
+        "eligible_frames": {
+          "in": 274,
+          "out": 133
+        },
+        "frame_ranges": {
+          "in": [
+            [
+              401,
+              549
+            ],
+            [
+              568,
+              583
+            ],
+            [
+              603,
+              603
+            ],
+            [
+              605,
+              605
+            ],
+            [
+              608,
+              611
+            ],
+            [
+              623,
+              625
+            ],
+            [
+              634,
+              649
+            ],
+            [
+              651,
+              677
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              681,
+              681
+            ]
+          ],
+          "out": []
+        }
+      },
+      {
+        "team": "B",
+        "metric": "team_width_m",
+        "unit": "m",
+        "status": "insufficient_data",
+        "reason": "too_few_frames",
+        "in_possession_median": null,
+        "out_of_possession_median": null,
+        "difference_in_minus_out": null,
+        "valid_frames": {
+          "in": 0,
+          "out": 219
+        },
+        "eligible_frames": {
+          "in": 133,
+          "out": 274
+        },
+        "frame_ranges": {
+          "in": [],
+          "out": [
+            [
+              401,
+              549
+            ],
+            [
+              568,
+              583
+            ],
+            [
+              603,
+              603
+            ],
+            [
+              605,
+              605
+            ],
+            [
+              608,
+              611
+            ],
+            [
+              623,
+              625
+            ],
+            [
+              634,
+              649
+            ],
+            [
+              651,
+              677
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              681,
+              681
+            ]
+          ]
+        }
+      },
+      {
+        "team": "B",
+        "metric": "team_length_m",
+        "unit": "m",
+        "status": "insufficient_data",
+        "reason": "too_few_frames",
+        "in_possession_median": null,
+        "out_of_possession_median": null,
+        "difference_in_minus_out": null,
+        "valid_frames": {
+          "in": 0,
+          "out": 219
+        },
+        "eligible_frames": {
+          "in": 133,
+          "out": 274
+        },
+        "frame_ranges": {
+          "in": [],
+          "out": [
+            [
+              401,
+              549
+            ],
+            [
+              568,
+              583
+            ],
+            [
+              603,
+              603
+            ],
+            [
+              605,
+              605
+            ],
+            [
+              608,
+              611
+            ],
+            [
+              623,
+              625
+            ],
+            [
+              634,
+              649
+            ],
+            [
+              651,
+              677
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              681,
+              681
+            ]
+          ]
+        }
+      },
+      {
+        "team": "B",
+        "metric": "compactness_m",
+        "unit": "m",
+        "status": "insufficient_data",
+        "reason": "too_few_frames",
+        "in_possession_median": null,
+        "out_of_possession_median": null,
+        "difference_in_minus_out": null,
+        "valid_frames": {
+          "in": 0,
+          "out": 219
+        },
+        "eligible_frames": {
+          "in": 133,
+          "out": 274
+        },
+        "frame_ranges": {
+          "in": [],
+          "out": [
+            [
+              401,
+              549
+            ],
+            [
+              568,
+              583
+            ],
+            [
+              603,
+              603
+            ],
+            [
+              605,
+              605
+            ],
+            [
+              608,
+              611
+            ],
+            [
+              623,
+              625
+            ],
+            [
+              634,
+              649
+            ],
+            [
+              651,
+              677
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              681,
+              681
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "opponent_spacing": {
+    "status": "supported",
+    "metric": "median_nearest_opponent_m",
+    "unit": "m",
+    "source_files": [
+      "runs/pipeline_v4_fresh/data/football_events_v1.csv",
+      "runs/pipeline_v4_fresh/analytics/outputs/inter_team_spatial_metrics_frame_identity_aware.csv"
+    ]
+  },
+  "event_sequences": {
+    "window_frames_per_side": 5,
+    "metric": "median_nearest_opponent_m",
+    "unit": "m",
+    "source_files": [
+      "runs/pipeline_v4_fresh/data/football_events_v1.csv",
+      "runs/pipeline_v4_fresh/analytics/outputs/inter_team_spatial_metrics_frame_identity_aware.csv"
+    ],
+    "supported": [
+      {
+        "pass_event_id": 27,
+        "reception_event_id": 28,
+        "team": "A",
+        "pass_frames": [
+          407,
+          442
+        ],
+        "reception_frame": 443,
+        "before_frames": [
+          402,
+          406
+        ],
+        "after_frames": [
+          444,
+          448
+        ],
+        "status": "supported",
+        "metric": "median_nearest_opponent_m",
+        "unit": "m",
+        "valid_frames": {
+          "before": 5,
+          "after": 5
+        },
+        "before_median": 4.97,
+        "after_median": 6.676,
+        "difference_after_minus_before": 1.706
+      },
+      {
+        "pass_event_id": 29,
+        "reception_event_id": 30,
+        "team": "A",
+        "pass_frames": [
+          492,
+          539
+        ],
+        "reception_frame": 540,
+        "before_frames": [
+          487,
+          491
+        ],
+        "after_frames": [
+          541,
+          545
+        ],
+        "status": "supported",
+        "metric": "median_nearest_opponent_m",
+        "unit": "m",
+        "valid_frames": {
+          "before": 5,
+          "after": 5
+        },
+        "before_median": 7.723,
+        "after_median": 9.409,
+        "difference_after_minus_before": 1.686
+      }
+    ],
+    "unavailable": [
+      {
+        "pass_event_id": 33,
+        "reception_event_id": 34,
+        "team": "A",
+        "pass_frames": [
+          573,
+          605
+        ],
+        "reception_frame": 606,
+        "before_frames": [
+          568,
+          572
+        ],
+        "after_frames": [
+          607,
+          611
+        ],
+        "reason": "missing_spacing_frames"
+      },
+      {
+        "reception_event_id": 25,
+        "reason": "no_paired_pass"
+      }
+    ]
+  }
+}
