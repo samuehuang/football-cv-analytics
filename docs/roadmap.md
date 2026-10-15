@@ -3,32 +3,33 @@
 [Back to README](../README.md).
 
 
-The next stage is to turn the existing tracking, event, and tactical outputs into traceable coaching observations within this repository.
+The deterministic Coach Report V1 prototype is implemented, with a [sample analysis and output snapshots](closeout/README.md). Further work would extend validation and reporting beyond the current clip-level case study.
 
-The milestones below describe planned work, not currently implemented capabilities. Version numbers are proposed release targets, subject to data availability and validation.
+The milestones below distinguish implemented prototype capabilities from future work. Version numbers are proposed release targets, subject to data availability and validation.
 
 | Stage | Status | Scope |
 | --- | --- | --- |
 | v4.1.0 — CV and tactical analytics | Implemented; validated on one sample video; see README | Player/ball tracking, possession states, event extraction, identity QA, and team-level tactical metrics. |
-| v5.0.0 — Coach Report V1 | Planned next | Deterministic feature extraction, rule-based observations, and JSON/Markdown reports with traceable evidence. |
+| v5.0.0 — Coach Report V1 | Prototype implemented; broader evaluation pending | Deterministic feature extraction, rule-based observations, and JSON/Markdown reports with traceable evidence. |
 | v5.1.0 — API and LLM-assisted reporting | Planned after report validation | FastAPI endpoints, Pydantic schemas, and optional LLM wording of verified observations. |
 | v6.0.0 — Multi-match analysis and retrieval | Future exploration | Comparable multi-match records, structured statistical queries, and evidence retrieval for reporting or scouting questions. |
 
 ### Coach Report V1
 
-Start with a report specification mapping each question to available input columns, metric definitions, evidence, and validation rules. Initial reports will describe the analyzed clip and valid observations, without implying full-match coverage.
+The [report specification](../reports/specs/coach_report_v1.md) defines input columns, metric definitions, evidence, and validation rules. Current reports describe the analyzed clip and valid observations, without implying full-match coverage.
 
-Planned report questions:
+The prototype covers:
 
 - How is observed possession distributed between teams, and where do possession phases begin and end?
 - How do team width, length, and compactness differ across in-possession and out-of-possession phases?
 - How do available opponent-spacing measurements change around detected passes and receptions?
-- Which supported event sequences coincide with the largest measured team-shape changes?
 - Which observations have sufficient data coverage to include in a coaching report?
 
-Planned outputs are structured JSON and deterministic Markdown reports covering clip overview, possession, team shape, spatial relationships, key sequences, and supported observations.
+Outputs are structured JSON and deterministic Markdown reports covering clip overview, possession, team shape, spatial relationships, and supported pass-to-reception sequences. In-possession versus out-of-possession comparisons are omitted when either state lacks sufficient observations.
 
-Release criteria:
+Ranking event sequences by team-shape changes remains future work.
+
+Validation requirements for broader release:
 
 - Every observation references its source run, strict or identity-aware branch, frame/time range, metric values, and relevant event IDs when applicable.
 - Metric units, temporal windows, valid-frame counts, and coverage denominators are explicit.

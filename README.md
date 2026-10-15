@@ -12,15 +12,17 @@ The pipeline separates tracking, trajectory cleaning, possession reasoning, even
 
 [Watch the full 30-second demo (MP4)](https://github.com/samuehuang/football-cv-analytics/releases/download/v4.1.0/football_cv_analytics_demo_full_30s.mp4)
 
+[Read the sample analysis](docs/closeout/README.md) · [View the generated coach report](docs/closeout/coach_report_v1.md)
+
 ## Results and Validation
 
 | Team shape | Compactness over time |
 | --- | --- |
 | <img src="docs/assets/team_shape_snapshot_identity_aware.png" width="430" alt="Identity-aware complete 10v10 team shape"> | <img src="docs/assets/team_compactness_over_time_identity_aware.png" width="430" alt="Identity-aware team compactness over time"> |
 
-Results below come from **one validated sample video**. They describe pipeline outputs and regression consistency, not standardized accuracy benchmarks.
+Results below come from **one sample video**. They describe pipeline outputs and regression consistency, not standardized accuracy benchmarks.
 
-| Output | Validated sample |
+| Output | Sample result |
 | --- | --- |
 | Player observations | 15,377 raw → 14,845 cleaned; 22 tracked IDs |
 | Trusted ball coverage | 635 / 750 frames (84.7%) |
@@ -82,11 +84,12 @@ Inspect representative outputs without running inference:
 | [team_tactical_metrics_summary_identity_aware.csv](examples/sample_outputs/team_tactical_metrics_summary_identity_aware.csv) | Team centroid, dimensions, compactness, and shape-area statistics |
 
 - [Pipeline reference](docs/pipeline_reference.md): component details, event counts, CLI options, output structure, configuration, and regression checks.
+- [Sample analysis](docs/closeout/README.md): clip-level findings, metric definitions, coverage limitations, and report reproduction.
 - [Development roadmap](docs/roadmap.md): planned report questions, evidence requirements, and release criteria.
 
-## Experimental Coach Report
+## Coach Report V1 — Prototype
 
-The draft [Coach Report V1](reports/specs/coach_report_v1.md) summarizes one analyzed clip from completed pipeline and tactical outputs:
+The implemented [Coach Report V1](reports/specs/coach_report_v1.md) prototype summarizes one analyzed clip from completed pipeline and tactical outputs:
 
 ```bash
 python reports/coach_report_v1.py --run-dir runs/my_match --branch identity_aware --include-event-windows
@@ -103,15 +106,15 @@ It writes JSON evidence and a short Markdown summary. Event windows require the 
 
 ## Roadmap
 
-These are **planned milestones**, not implemented features. Version numbers are proposed targets, subject to validation and data availability.
+The deterministic report prototype is implemented. Broader evaluation and the API, LLM, and multi-match extensions remain future work. Version numbers below are proposed release targets, not claims of published releases.
 
-| Target | Planned scope |
-| --- | --- |
-| v5.0.0 | Deterministic Coach Report V1: rule-based observations and JSON/Markdown reports linked to frames, metrics, and events |
-| v5.1.0 | FastAPI/Pydantic reporting API and optional LLM wording of verified observations |
-| v6.0.0 | Multi-match comparisons and evidence retrieval; RAG/scouting exploration when sufficient validated data exists |
+| Target | Status | Scope |
+| --- | --- | --- |
+| v5.0.0 | Report prototype implemented; broader evaluation pending | Deterministic observations and JSON/Markdown reports linked to frames, metrics, and events |
+| v5.1.0 | Planned | FastAPI/Pydantic reporting API and optional LLM wording of verified observations |
+| v6.0.0 | Future exploration | Multi-match comparisons and evidence retrieval; RAG/scouting exploration when sufficient validated data exists |
 
-Start with the deterministic report. Numerical analysis remains in code; LLMs may assist presentation, and player-level comparisons require verified identity mapping. See the [full roadmap](docs/roadmap.md).
+Numerical analysis runs in code. Any future LLM layer would assist presentation, while player-level comparisons would require verified identity mapping. See the [full roadmap](docs/roadmap.md).
 
 ## License
 
